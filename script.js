@@ -94,21 +94,15 @@ function updateDailyReport() {
     });
 }
 
-// ✅ IMPROVED BlazePose (head-down = writing)
+// BlazePose logic
 function isWritingPose(landmarks) {
-  const head = landmarks[0];
-  const leftShoulder = landmarks[11];
-  const rightShoulder = landmarks[12];
-
-  if (!head || (!leftShoulder && !rightShoulder)) return false;
-
-  return (
-    (leftShoulder && head.y > leftShoulder.y) &&
-    (rightShoulder && head.y > rightShoulder.y)
-  );
+  const headY = landmarks[0].y;
+  const leftWristY = landmarks[15].y;
+  const rightWristY = landmarks[16].y;
+  return (headY < leftWristY && headY < rightWristY);
 }
 
-// ✅ FaceMesh: face direction check (optional but used)
+// FaceMesh logic
 function checkFaceDirection(landmarks) {
   const leftEye = landmarks[33];
   const rightEye = landmarks[263];
@@ -118,7 +112,7 @@ function checkFaceDirection(landmarks) {
   const noseCenter = (leftEye.x + rightEye.x) / 2;
   const faceAngle = noseTip.x - noseCenter;
 
-  return Math.abs(faceAngle) < 0.05;
+  return Math.abs(faceAngle) < 0.03;
 }
 
 function evaluateStudyStatus() {
