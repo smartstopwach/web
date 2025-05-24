@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Study Stopwatch</title>
+  <meta name="description" content="Track your study time automatically using body posture. BlazePose detects when you're writing or using your phone." />
+  <meta name="keywords" content="study timer, posture detection, writing pose, blaze pose, phone detection, productivity" />
+  <meta name="author" content="Naitik Raj" />
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose@0.5/pose.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+  <script defer src="script.js"></script>
+</head>
+<body>
+  <div class="container">
+    <h1>Study Stopwatch</h1>
+    <div id="stopwatch">00:00:00</div>
+    <div class="controls">
+      <button id="reset">Reset</button>
+    </div>
+    <div id="status">Loading...</div>
+    <div class="report">
+      <h3>Daily Report</h3>
+      <ul id="daily-report"></ul>
+    </div>
+  </div>
+
+  <footer>
+    <p>
+      <a href="#about">About</a> |
+      <a href="#privacy">Privacy Policy</a> |
+      <a href="mailto:rajnaitik620@gmail.com">Contact</a> |
+      <a href="https://www.instagram.com/itz_raj_0990_?igsh=bTl6NmgzOGI3OWQy" target="_blank">Instagram</a>
+    </p>
+  </footer>
+
+  <div id="about" class="info-section">
+    <h3>About</h3>
+    <p>This app tracks your study time using posture detection powered by MediaPipe BlazePose. It ensures you're really studying before counting the time.</p>
+  </div>
+
+  <div id="privacy" class="info-section">
+    <h3>Privacy Policy</h3>
+    <p>Your camera is used only in your browser for detecting posture. No data is sent or stored externally. All study data is saved locally in your browser.</p>
+  </div>
+</body>
+</html>
