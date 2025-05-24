@@ -94,15 +94,36 @@ function updateDailyReport() {
     });
 }
 
-// BlazePose logic
+// ✅ IMPROVED BlazePose: writing detection
 function isWritingPose(landmarks) {
-  const headY = landmarks[0].y;
-  const leftWristY = landmarks[15].y;
-  const rightWristY = landmarks[16].y;
-  return (headY < leftWristY && headY < rightWristY);
+  const head = landmarks[0];
+  const leftWrist = landmarks[15];
+  const rightWrist = landmarks[16];
+  const leftElbow = landmarks[13];
+  const rightElbow = landmarks[14];
+  const leftShoulder = landmarks[11];
+  const rightShoulder = landmarks[12];
+
+  if (!head || (!leftWrist && !rightWrist)) return false;
+
+  const isHeadLower = (refPoint) => head.y < refPoint.y;
+
+  const headBelowShoulders =
+    (leftShoulder && isHeadLower(leftShoulder)) ||
+    (rightShoulder && isHeadLower(rightShoulder));
+
+  const wristAboveHead =
+    (leftWrist && leftWrist.y > head.y) ||
+    (rightWrist && rightWrist.y > head.y);
+
+  const elbowsBent =
+    (leftElbow && leftWrist && Math.abs(leftWrist.x - leftElbow.x) < 0.2) ||
+    (rightElbow && rightWrist && Math.abs(rightWrist.x - rightElbow.x) < 0.2);
+
+  return headBelowShoulders && wristAboveHead && elbowsBent;
 }
 
-// FaceMesh logic
+// ✅ FaceMesh: face direction check
 function checkFaceDirection(landmarks) {
   const leftEye = landmarks[33];
   const rightEye = landmarks[263];
