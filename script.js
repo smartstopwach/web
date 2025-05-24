@@ -1,53 +1,118 @@
-let isRunning = false;
 let todaySeconds = 0;
-let interval;
-let isWriting = false;
-let faceLookingForward = false;
+let startTime = 0;
+let isRunning = false;
+let wakeLock = null;
+
+const todayKey = new Date().toISOString().slice(0, 10);
+const videoElement = document.createElement("video");
+videoElement.setAttribute("playsinline", true);
+document.body.appendChild(videoElement);
 
 const statusText = document.getElementById("status");
-const todayKey = new Date().toISOString().slice(0, 10);
-const digits = {
-  h1: document.getElementById("h1"),
-  h2: document.getElementById("h2"),
-  m1: document.getElementById("m1"),
-  m2: document.getElementById("m2"),
-  s1: document.getElementById("s1"),
-  s2: document.getElementById("s2"),
-};
+const stopwatchDisplay = document.getElementById("stopwatch");
+const resetBtn = document.getElementById("reset");
+resetBtn.addEventListener("click", resetTimer);
 
-function updateClockDisplay(seconds) {
-  const h = String(Math.floor(seconds / 3600)).padStart(2, "0");
-  const m = String(Math.floor((seconds % 3600) / 60)).padStart(2, "0");
-  const s = String(seconds % 60).padStart(2, "0");
+let faceLookingForward = false;
+let isWriting = false;
 
-  digits.h1.textContent = h[0];
-  digits.h2.textContent = h[1];
-  digits.m1.textContent = m[0];
-  digits.m2.textContent = m[1];
-  digits.s1.textContent = s[0];
-  digits.s2.textContent = s[1];
+async function requestWakeLock() {
+  try {
+    if ("wakeLock" in navigator) {
+      wakeLock = await navigator.wakeLock.request("screen");
+    }
+  } catch (err) {
+    console.error("Wake Lock failed:", err);
+  }
+
+  document.addEventListener("visibilitychange", async () => {
+    if (wakeLock && document.visibilityState === "visible") {
+      await requestWakeLock();
+    }
+  });
+}
+
+function updateTime() {
+  todaySeconds++;
+  stopwatchDisplay.textContent = formatTime(todaySeconds);
+  localStorage.setItem(todayKey, todaySeconds);
+  updateDailyReport();
+}
+
+function formatTime(sec) {
+  const hrs = String(Math.floor(sec / 3600)).padStart(2, "0");
+  const mins = String(Math.floor((sec % 3600) / 60)).padStart(2, "0");
+  const secs = String(sec % 60).padStart(2, "0");
+  return `${hrs}:${mins}:${secs}`;
 }
 
 function startTimer() {
   if (!isRunning) {
     isRunning = true;
-    interval = setInterval(() => {
-      todaySeconds++;
-      localStorage.setItem(todayKey, todaySeconds);
-      updateClockDisplay(todaySeconds);
-    }, 1000);
-    document.body.classList.add("fullscreen", "running");
-    document.body.classList.remove("paused");
+    startTime = setInterval(updateTime, 1000);
   }
 }
 
 function pauseTimer() {
   if (isRunning) {
     isRunning = false;
-    clearInterval(interval);
-    document.body.classList.remove("running");
-    document.body.classList.add("paused");
+    clearInterval(startTime);
   }
+}
+
+function resetTimer() {
+  pauseTimer();
+  todaySeconds = 0;
+  stopwatchDisplay.textContent = formatTime(todaySeconds);
+  localStorage.removeItem(todayKey);
+  updateDailyReport();
+}
+
+function loadStoredTime() {
+  const saved = localStorage.getItem(todayKey);
+  if (saved) {
+    todaySeconds = parseInt(saved);
+    stopwatchDisplay.textContent = formatTime(todaySeconds);
+  }
+  updateDailyReport();
+}
+
+function updateDailyReport() {
+  const report = document.getElementById("daily-report");
+  if (!report) return;
+  report.innerHTML = "";
+  Object.keys(localStorage)
+    .filter(key => /^\d{4}-\d{2}-\d{2}$/.test(key))
+    .sort()
+    .reverse()
+    .forEach(key => {
+      const sec = parseInt(localStorage.getItem(key));
+      const time = formatTime(sec);
+      const li = document.createElement("li");
+      li.textContent = `${key}: ${time}`;
+      report.appendChild(li);
+    });
+}
+
+// BlazePose logic
+function isWritingPose(landmarks) {
+  const headY = landmarks[0].y;
+  const leftWristY = landmarks[15].y;
+  const rightWristY = landmarks[16].y;
+  return (headY < leftWristY && headY < rightWristY);
+}
+
+// FaceMesh logic
+function checkFaceDirection(landmarks) {
+  const leftEye = landmarks[33];
+  const rightEye = landmarks[263];
+  const noseTip = landmarks[1];
+
+  const eyeDiff = Math.abs(leftEye.x - rightEye.x);
+  const noseCenter = (leftEye.x + rightEye.x) / 2;
+  const faceAngle = noseTip.x - noseCenter;
+
+  return Math.abs(faceAngle) < 0.03;
 }
 
 function evaluateStudyStatus() {
@@ -60,32 +125,15 @@ function evaluateStudyStatus() {
   }
 }
 
-document.getElementById("fullscreen-btn").addEventListener("click", () => {
-  if (!document.fullscreenElement) {
-    document.documentElement.requestFullscreen();
-  } else {
-    document.exitFullscreen();
-  }
-});
-
-window.onload = () => {
-  const stored = localStorage.getItem(todayKey);
-  if (stored) {
-    todaySeconds = parseInt(stored);
-    updateClockDisplay(todaySeconds);
-  }
-
-  const video = document.createElement("video");
-  video.setAttribute("playsinline", "");
-  video.style.display = "none";
-  document.body.appendChild(video);
+window.onload = async () => {
+  await requestWakeLock();
+  loadStoredTime();
 
   const pose = new Pose({
-    locateFile: (f) => `https://cdn.jsdelivr.net/npm/@mediapipe/pose@0.5/${f}`
+    locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/pose@0.5/${file}`
   });
-
   const faceMesh = new FaceMesh({
-    locateFile: (f) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh@0.4/${f}`
+    locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh@0.4/${file}`
   });
 
   pose.setOptions({
@@ -93,32 +141,26 @@ window.onload = () => {
     smoothLandmarks: true,
     enableSegmentation: false,
     minDetectionConfidence: 0.5,
-    minTrackingConfidence: 0.5,
+    minTrackingConfidence: 0.5
   });
 
   faceMesh.setOptions({
     maxNumFaces: 1,
     refineLandmarks: true,
     minDetectionConfidence: 0.5,
-    minTrackingConfidence: 0.5,
+    minTrackingConfidence: 0.5
   });
 
-  pose.onResults((res) => {
-    if (res.poseLandmarks) {
-      const hY = res.poseLandmarks[0].y;
-      const lY = res.poseLandmarks[15].y;
-      const rY = res.poseLandmarks[16].y;
-      isWriting = hY < lY && hY < rY;
+  pose.onResults((results) => {
+    if (results.poseLandmarks) {
+      isWriting = isWritingPose(results.poseLandmarks);
       evaluateStudyStatus();
     }
   });
 
-  faceMesh.onResults((res) => {
-    if (res.multiFaceLandmarks?.length > 0) {
-      const lm = res.multiFaceLandmarks[0];
-      const nose = lm[1].x;
-      const eyesCenter = (lm[33].x + lm[263].x) / 2;
-      faceLookingForward = Math.abs(nose - eyesCenter) < 0.03;
+  faceMesh.onResults((results) => {
+    if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
+      faceLookingForward = checkFaceDirection(results.multiFaceLandmarks[0]);
       evaluateStudyStatus();
     } else {
       faceLookingForward = false;
@@ -126,13 +168,13 @@ window.onload = () => {
     }
   });
 
-  const camera = new Camera(video, {
+  const camera = new Camera(videoElement, {
     onFrame: async () => {
-      await pose.send({ image: video });
-      await faceMesh.send({ image: video });
+      await pose.send({ image: videoElement });
+      await faceMesh.send({ image: videoElement });
     },
     width: 640,
-    height: 480,
+    height: 480
   });
 
   camera.start();
