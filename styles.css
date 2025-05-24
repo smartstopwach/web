@@ -1,0 +1,54 @@
+body {
+  font-family: 'Poppins', sans-serif;
+  background: #111;
+  color: #fff;
+  text-align: center;
+  margin: 0;
+  padding: 0;
+}
+.container {
+  margin-top: 40px;
+  padding: 20px;
+}
+#stopwatch {
+  font-size: 3em;
+  margin: 20px 0;
+}
+.controls button {
+  padding: 10px 20px;
+  font-size: 1em;
+  background-color: #00cec9;
+  color: black;
+  border: none;
+  border-radius: 6px;
+}
+#status {
+  margin-top: 20px;
+  font-weight: bold;
+}
+.report {
+  margin-top: 30px;
+  text-align: left;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+}
+footer {
+  margin-top: 40px;
+  font-size: 0.9em;
+  color: #aaa;
+}
+footer a {
+  color: #00cec9;
+  text-decoration: none;
+}
+footer a:hover {
+  text-decoration: underline;
+}
+.info-section {
+  padding: 20px;
+  font-size: 0.9em;
+  max-width: 600px;
+  margin: 0 auto;
+  color: #ccc;
+}
