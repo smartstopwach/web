@@ -94,36 +94,21 @@ function updateDailyReport() {
     });
 }
 
-// ✅ IMPROVED BlazePose: writing detection
+// ✅ IMPROVED BlazePose (head-down = writing)
 function isWritingPose(landmarks) {
   const head = landmarks[0];
-  const leftWrist = landmarks[15];
-  const rightWrist = landmarks[16];
-  const leftElbow = landmarks[13];
-  const rightElbow = landmarks[14];
   const leftShoulder = landmarks[11];
   const rightShoulder = landmarks[12];
 
-  if (!head || (!leftWrist && !rightWrist)) return false;
+  if (!head || (!leftShoulder && !rightShoulder)) return false;
 
-  const isHeadLower = (refPoint) => head.y < refPoint.y;
-
-  const headBelowShoulders =
-    (leftShoulder && isHeadLower(leftShoulder)) ||
-    (rightShoulder && isHeadLower(rightShoulder));
-
-  const wristAboveHead =
-    (leftWrist && leftWrist.y > head.y) ||
-    (rightWrist && rightWrist.y > head.y);
-
-  const elbowsBent =
-    (leftElbow && leftWrist && Math.abs(leftWrist.x - leftElbow.x) < 0.2) ||
-    (rightElbow && rightWrist && Math.abs(rightWrist.x - rightElbow.x) < 0.2);
-
-  return headBelowShoulders && wristAboveHead && elbowsBent;
+  return (
+    (leftShoulder && head.y > leftShoulder.y) &&
+    (rightShoulder && head.y > rightShoulder.y)
+  );
 }
 
-// ✅ FaceMesh: face direction check
+// ✅ FaceMesh: face direction check (optional but used)
 function checkFaceDirection(landmarks) {
   const leftEye = landmarks[33];
   const rightEye = landmarks[263];
@@ -133,7 +118,7 @@ function checkFaceDirection(landmarks) {
   const noseCenter = (leftEye.x + rightEye.x) / 2;
   const faceAngle = noseTip.x - noseCenter;
 
-  return Math.abs(faceAngle) < 0.03;
+  return Math.abs(faceAngle) < 0.05;
 }
 
 function evaluateStudyStatus() {
