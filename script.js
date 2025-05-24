@@ -13,9 +13,6 @@ const stopwatchDisplay = document.getElementById("stopwatch");
 const resetBtn = document.getElementById("reset");
 resetBtn.addEventListener("click", resetTimer);
 
-let lastFaceForward = false;
-let lastWritingPose = false;
-
 async function requestWakeLock() {
   try {
     if ("wakeLock" in navigator) {
@@ -94,6 +91,7 @@ function updateDailyReport() {
     });
 }
 
+// Pose Detection Logic
 function isWritingPose(landmarks) {
   const headY = landmarks[0].y;
   const leftWristY = landmarks[15].y;
@@ -101,26 +99,35 @@ function isWritingPose(landmarks) {
   return (headY < leftWristY && headY < rightWristY);
 }
 
-function isFaceForward(landmarks) {
-  const leftCheek = landmarks[234];
-  const rightCheek = landmarks[454];
-  const nose = landmarks[1];
+function isPhonePosture(landmarks) {
+  const leftWrist = landmarks[15];
+  const rightWrist = landmarks[16];
+  const nose = landmarks[0];
 
-  const leftDist = Math.abs(nose.x - leftCheek.x);
-  const rightDist = Math.abs(nose.x - rightCheek.x);
-  const ratio = leftDist / rightDist;
+  const nearFace = (wrist) => {
+    const dx = wrist.x - nose.x;
+    const dy = wrist.y - nose.y;
+    return Math.sqrt(dx * dx + dy * dy) < 0.1;
+  };
 
-  return ratio > 0.75 && ratio < 1.25;
+  return nearFace(leftWrist) && nearFace(rightWrist);
 }
 
-function evaluateStudyCondition() {
-  if (lastWritingPose && lastFaceForward) {
-    statusText.textContent = "Focused — Studying";
+function onResults(results) {
+  if (!results.poseLandmarks) {
+    statusText.textContent = "No person detected — paused";
+    pauseTimer();
+    return;
+  }
+
+  if (isPhonePosture(results.poseLandmarks)) {
+    statusText.textContent = "Phone posture detected — paused";
+    pauseTimer();
+  } else if (isWritingPose(results.poseLandmarks)) {
+    statusText.textContent = "Studying posture detected — running";
     startTimer();
   } else {
-    statusText.textContent = lastWritingPose
-      ? "Face not forward — Paused"
-      : "No writing posture — Paused";
+    statusText.textContent = "Idle posture — paused";
     pauseTimer();
   }
 }
@@ -129,9 +136,10 @@ window.onload = async () => {
   await requestWakeLock();
   loadStoredTime();
 
-  const pose = new Pose.Pose({
-    locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/pose@0.5/${file}`
+  const pose = new Pose({
+    locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/pose@0.5/${file}`,
   });
+
   pose.setOptions({
     modelComplexity: 0,
     smoothLandmarks: true,
@@ -139,36 +147,12 @@ window.onload = async () => {
     minDetectionConfidence: 0.5,
     minTrackingConfidence: 0.5,
   });
-  pose.onResults((results) => {
-    if (results.poseLandmarks) {
-      lastWritingPose = isWritingPose(results.poseLandmarks);
-      evaluateStudyCondition();
-    }
-  });
 
-  const faceMesh = new FaceMesh.FaceMesh({
-    locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh@0.4/${file}`
-  });
-  faceMesh.setOptions({
-    maxNumFaces: 1,
-    refineLandmarks: true,
-    minDetectionConfidence: 0.5,
-    minTrackingConfidence: 0.5,
-  });
-  faceMesh.onResults((results) => {
-    if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
-      lastFaceForward = isFaceForward(results.multiFaceLandmarks[0]);
-      evaluateStudyCondition();
-    } else {
-      lastFaceForward = false;
-      evaluateStudyCondition();
-    }
-  });
+  pose.onResults(onResults);
 
   const camera = new Camera(videoElement, {
     onFrame: async () => {
       await pose.send({ image: videoElement });
-      await faceMesh.send({ image: videoElement });
     },
     width: 640,
     height: 480,
