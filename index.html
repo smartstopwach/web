@@ -4,11 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Study Stopwatch</title>
-  <meta name="description" content="Track your study time automatically using body posture. BlazePose detects when you're writing or using your phone." />
-  <meta name="keywords" content="study timer, posture detection, writing pose, blaze pose, phone detection, productivity" />
+  <meta name="description" content="Track your study time automatically using body posture and face direction. BlazePose and FaceMesh powered focus detector." />
+  <meta name="keywords" content="study timer, posture detection, writing pose, blaze pose, face direction, productivity" />
   <meta name="author" content="Naitik Raj" />
   <link rel="stylesheet" href="styles.css" />
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose@0.5/pose.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh@0.4/face_mesh.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
   <script defer src="script.js"></script>
 </head>
@@ -37,12 +38,12 @@
 
   <div id="about" class="info-section">
     <h3>About</h3>
-    <p>This app tracks your study time using posture detection powered by MediaPipe BlazePose. It ensures you're really studying before counting the time.</p>
+    <p>This app tracks your study time using posture and face direction detection powered by MediaPipe BlazePose and FaceMesh. It ensures you're really studying before counting the time.</p>
   </div>
 
   <div id="privacy" class="info-section">
     <h3>Privacy Policy</h3>
-    <p>Your camera is used only in your browser for detecting posture. No data is sent or stored externally. All study data is saved locally in your browser.</p>
+    <p>Your camera is used only in your browser for detecting posture and face direction. No data is sent or stored externally. All study data is saved locally in your browser.</p>
   </div>
 </body>
 </html>
