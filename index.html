@@ -4,31 +4,48 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Study Stopwatch</title>
-  <meta name="description" content="Fullscreen flip clock stopwatch with face and writing posture detection." />
+  <meta name="description" content="Track your study time automatically using body posture. BlazePose and FaceMesh detect if you're truly focused." />
+  <meta name="keywords" content="study stopwatch, productivity tracker, posture detection, AI study, blaze pose, face mesh" />
+  <meta name="author" content="Naitik Raj" />
   <link rel="stylesheet" href="styles.css" />
 
-  <!-- MediaPipe -->
+  <!-- MediaPipe Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose@0.5/pose.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh@0.4/face_mesh.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
   <script defer src="script.js"></script>
 </head>
 <body>
-  <div id="app">
-    <div class="top-bar">
-      <img id="fullscreen-btn" src="https://img.icons8.com/ios-filled/50/ffffff/full-screen.png" alt="Fullscreen" title="Fullscreen"/>
+  <div class="container">
+    <h1>Study Stopwatch</h1>
+    <div id="stopwatch">00:00:00</div>
+    <div class="controls">
+      <button id="reset">Reset</button>
     </div>
-    <div class="flip-clock">
-      <div class="digit" id="h1">0</div>
-      <div class="digit" id="h2">0</div>
-      <div class="colon">:</div>
-      <div class="digit" id="m1">0</div>
-      <div class="digit" id="m2">0</div>
-      <div class="colon">:</div>
-      <div class="digit" id="s1">0</div>
-      <div class="digit" id="s2">0</div>
+    <div id="status">Loading...</div>
+    <div class="report">
+      <h3>Daily Report</h3>
+      <ul id="daily-report"></ul>
     </div>
-    <div class="status" id="status">Loading...</div>
+  </div>
+
+  <footer>
+    <p>
+      <a href="#about">About</a> |
+      <a href="#privacy">Privacy Policy</a> |
+      <a href="mailto:rajnaitik620@gmail.com">Contact</a> |
+      <a href="https://www.instagram.com/itz_raj_0990_?igsh=bTl6NmgzOGI3OWQy" target="_blank">Instagram</a>
+    </p>
+  </footer>
+
+  <div id="about" class="info-section">
+    <h3>About</h3>
+    <p>This app uses AI posture detection (BlazePose + FaceMesh) to track when you're truly studying. Timer runs only when you're focused — no distractions!</p>
+  </div>
+
+  <div id="privacy" class="info-section">
+    <h3>Privacy Policy</h3>
+    <p>Your webcam is used only locally in your browser for posture detection. No photos, videos, or personal data is sent anywhere. Your time data is saved safely in your browser using localStorage.</p>
   </div>
 </body>
 </html>
