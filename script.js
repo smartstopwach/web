@@ -13,8 +13,10 @@ const stopwatchDisplay = document.getElementById("stopwatch");
 const resetBtn = document.getElementById("reset");
 resetBtn.addEventListener("click", resetTimer);
 
-let faceLookingForward = false;
 let isWriting = false;
+let faceForward = false;
+let isPhonePose = false;
+let visibleJoints = { leftWrist: false, rightWrist: false };
 
 async function requestWakeLock() {
   try {
@@ -94,7 +96,7 @@ function updateDailyReport() {
     });
 }
 
-// BlazePose logic
+// BlazePose writing detection
 function isWritingPose(landmarks) {
   const headY = landmarks[0].y;
   const leftWristY = landmarks[15].y;
@@ -102,25 +104,50 @@ function isWritingPose(landmarks) {
   return (headY < leftWristY && headY < rightWristY);
 }
 
-// FaceMesh logic
-function checkFaceDirection(landmarks) {
+// FaceMesh front detection
+function checkFaceForward(landmarks) {
   const leftEye = landmarks[33];
   const rightEye = landmarks[263];
-  const noseTip = landmarks[1];
-
-  const eyeDiff = Math.abs(leftEye.x - rightEye.x);
-  const noseCenter = (leftEye.x + rightEye.x) / 2;
-  const faceAngle = noseTip.x - noseCenter;
-
-  return Math.abs(faceAngle) < 0.03;
+  const nose = landmarks[1];
+  const center = (leftEye.x + rightEye.x) / 2;
+  const angle = nose.x - center;
+  return Math.abs(angle) < 0.03;
 }
 
-function evaluateStudyStatus() {
-  if (isWriting && faceLookingForward) {
+// New: Phone detection even if wrists hidden
+function detectPhonePose(poseLandmarks) {
+  const nose = poseLandmarks[0];
+  const leftWrist = poseLandmarks[15];
+  const rightWrist = poseLandmarks[16];
+
+  // Wrist visibility flags
+  visibleJoints.leftWrist = leftWrist.visibility > 0.5;
+  visibleJoints.rightWrist = rightWrist.visibility > 0.5;
+
+  const dist = (a, b) => {
+    const dx = a.x - b.x;
+    const dy = a.y - b.y;
+    return Math.sqrt(dx * dx + dy * dy);
+  };
+
+  const wristNearNose =
+    dist(leftWrist, nose) < 0.1 && dist(rightWrist, nose) < 0.1;
+
+  const wristHidden =
+    !visibleJoints.leftWrist && !visibleJoints.rightWrist;
+
+  return wristNearNose || wristHidden;
+}
+
+function evaluateStatus() {
+  if (isPhonePose) {
+    statusText.textContent = "Phone posture — paused";
+    pauseTimer();
+  } else if (isWriting && faceForward) {
     statusText.textContent = "Focused — Studying";
     startTimer();
   } else {
-    statusText.textContent = "Not Focused — Paused";
+    statusText.textContent = "Not focused — paused";
     pauseTimer();
   }
 }
@@ -130,10 +157,13 @@ window.onload = async () => {
   loadStoredTime();
 
   const pose = new Pose({
-    locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/pose@0.5/${file}`
+    locateFile: (file) =>
+      `https://cdn.jsdelivr.net/npm/@mediapipe/pose@0.5/${file}`
   });
+
   const faceMesh = new FaceMesh({
-    locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh@0.4/${file}`
+    locateFile: (file) =>
+      `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh@0.4/${file}`
   });
 
   pose.setOptions({
@@ -154,17 +184,18 @@ window.onload = async () => {
   pose.onResults((results) => {
     if (results.poseLandmarks) {
       isWriting = isWritingPose(results.poseLandmarks);
-      evaluateStudyStatus();
+      isPhonePose = detectPhonePose(results.poseLandmarks);
+      evaluateStatus();
     }
   });
 
   faceMesh.onResults((results) => {
-    if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
-      faceLookingForward = checkFaceDirection(results.multiFaceLandmarks[0]);
-      evaluateStudyStatus();
-    } else {
-      faceLookingForward = false;
-      evaluateStudyStatus();
+    if (
+      results.multiFaceLandmarks &&
+      results.multiFaceLandmarks.length > 0
+    ) {
+      faceForward = checkFaceForward(results.multiFaceLandmarks[0]);
+      evaluateStatus();
     }
   });
 
