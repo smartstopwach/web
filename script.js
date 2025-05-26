@@ -114,13 +114,12 @@ function checkFaceForward(landmarks) {
   return Math.abs(angle) < 0.03;
 }
 
-// New: Phone detection even if wrists hidden
+// Smart phone detection
 function detectPhonePose(poseLandmarks) {
   const nose = poseLandmarks[0];
   const leftWrist = poseLandmarks[15];
   const rightWrist = poseLandmarks[16];
 
-  // Wrist visibility flags
   visibleJoints.leftWrist = leftWrist.visibility > 0.5;
   visibleJoints.rightWrist = rightWrist.visibility > 0.5;
 
@@ -139,15 +138,19 @@ function detectPhonePose(poseLandmarks) {
   return wristNearNose || wristHidden;
 }
 
+// ✅ Set status + background
 function evaluateStatus() {
   if (isPhonePose) {
     statusText.textContent = "Phone posture — paused";
+    document.body.style.backgroundColor = "#2b0000"; // red when distracted
     pauseTimer();
   } else if (isWriting && faceForward) {
     statusText.textContent = "Focused — Studying";
+    document.body.style.backgroundColor = "#000000"; // black when studying
     startTimer();
   } else {
     statusText.textContent = "Not focused — paused";
+    document.body.style.backgroundColor = "#2b0000"; // red background
     pauseTimer();
   }
 }
