@@ -1,54 +1,101 @@
 body {
-  font-family: 'Poppins', sans-serif;
-  background: #111;
+  background-color: #000;
   color: #fff;
+  font-family: 'Poppins', sans-serif;
   text-align: center;
   margin: 0;
   padding: 0;
+  transition: background-color 0.4s ease-in-out;
 }
+
 .container {
-  margin-top: 40px;
-  padding: 20px;
+  padding: 30px 20px;
+  max-width: 600px;
+  margin: auto;
 }
+
+h1 {
+  font-size: 2.5em;
+  margin-bottom: 20px;
+}
+
 #stopwatch {
   font-size: 3em;
   margin: 20px 0;
+  font-weight: bold;
 }
+
 .controls button {
-  padding: 10px 20px;
+  padding: 10px 25px;
   font-size: 1em;
   background-color: #00cec9;
   color: black;
   border: none;
   border-radius: 6px;
+  cursor: pointer;
 }
+
+.controls button:hover {
+  background-color: #01b2b0;
+}
+
 #status {
   margin-top: 20px;
   font-weight: bold;
+  font-size: 1.1em;
 }
+
 .report {
-  margin-top: 30px;
+  margin-top: 40px;
   text-align: left;
   max-width: 500px;
   margin-left: auto;
   margin-right: auto;
 }
+
+.report h3 {
+  margin-bottom: 10px;
+}
+
+.report ul {
+  list-style: none;
+  padding: 0;
+}
+
+.report li {
+  margin-bottom: 5px;
+  color: #ccc;
+}
+
 footer {
-  margin-top: 40px;
+  margin-top: 50px;
   font-size: 0.9em;
   color: #aaa;
 }
+
 footer a {
   color: #00cec9;
   text-decoration: none;
 }
+
 footer a:hover {
   text-decoration: underline;
 }
+
 .info-section {
   padding: 20px;
   font-size: 0.9em;
   max-width: 600px;
-  margin: 0 auto;
+  margin: 40px auto;
   color: #ccc;
+  text-align: left;
+}
+
+.info-section ul {
+  padding-left: 20px;
+}
+
+.info-section h3 {
+  color: #00cec9;
+  margin-bottom: 10px;
 }
