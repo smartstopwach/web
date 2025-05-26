@@ -114,7 +114,7 @@ function checkFaceForward(landmarks) {
   return Math.abs(angle) < 0.03;
 }
 
-// Smart phone detection
+// Phone posture detection
 function detectPhonePose(poseLandmarks) {
   const nose = poseLandmarks[0];
   const leftWrist = poseLandmarks[15];
@@ -138,19 +138,19 @@ function detectPhonePose(poseLandmarks) {
   return wristNearNose || wristHidden;
 }
 
-// ✅ Set status + background
+// Final logic with background color change
 function evaluateStatus() {
   if (isPhonePose) {
     statusText.textContent = "Phone posture — paused";
-    document.body.style.backgroundColor = "#2b0000"; // red when distracted
+    document.body.style.backgroundColor = "#8B0000"; // full dark red
     pauseTimer();
   } else if (isWriting && faceForward) {
     statusText.textContent = "Focused — Studying";
-    document.body.style.backgroundColor = "#000000"; // black when studying
+    document.body.style.backgroundColor = "#000000"; // black
     startTimer();
   } else {
     statusText.textContent = "Not focused — paused";
-    document.body.style.backgroundColor = "#2b0000"; // red background
+    document.body.style.backgroundColor = "#8B0000"; // full dark red
     pauseTimer();
   }
 }
