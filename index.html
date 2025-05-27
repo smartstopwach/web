@@ -4,6 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Study Stopwatch</title>
+
+  <!-- ✅ Monetag Verification -->
+  <meta name="monetag" content="9dba501e304d042774fd4706e44ddf84">
+
   <meta name="description" content="Track your study time automatically using body posture. BlazePose and FaceMesh detect if you're truly focused." />
   <meta name="keywords" content="study stopwatch, productivity tracker, posture detection, AI study, blaze pose, face mesh" />
   <meta name="author" content="Naitik Raj" />
@@ -23,6 +27,7 @@
       <button id="reset">Reset</button>
     </div>
     <div id="status">Loading...</div>
+
     <div class="report">
       <h3>Daily Report</h3>
       <ul id="daily-report"></ul>
@@ -38,24 +43,26 @@
     </p>
   </footer>
 
+  <!-- About Section -->
   <div id="about" class="info-section">
     <h3>About</h3>
-    <p>This app uses BlazePose and FaceMesh to detect your writing posture and face direction in real-time. The timer runs only when you are actively focused on studying.</p>
+    <p>This app uses BlazePose and FaceMesh to detect your writing posture and focus direction in real time. It helps you stay truly productive by running the timer only when you're really studying.</p>
   </div>
 
-  <!-- ✅ Important Guidelines Block -->
+  <!-- 🔥 Important Guidelines Section -->
   <div class="info-section" style="background-color: #222; border-left: 4px solid #00cec9; padding: 15px; margin-top: 20px;">
     <h3 style="color: #00cec9;">⚠️ Important Study Guidelines</h3>
     <ul style="text-align: left; font-size: 0.95em; line-height: 1.6;">
-      <li><strong>1.</strong> Please make sure your <strong>face and both hands</strong> are fully visible in the camera frame for accurate detection.</li>
-      <li><strong>2.</strong> Maintain at least <strong>25 cm (10 inches)</strong> distance from your copy or book. This helps both with detection and protects your <strong>eye health</strong>.</li>
-      <li><strong>3.</strong> Keep your <strong>phone or screen 40–50 cm</strong> from your face to reduce strain and avoid misdetection.</li>
+      <li><strong>1.</strong> Make sure your <strong>face and hands are clearly visible</strong> in the camera frame for accurate detection.</li>
+      <li><strong>2.</strong> Maintain at least <strong>25 cm (10 inches)</strong> distance from your notebook while reading or writing — this is ideal for posture and <strong>eye health</strong>.</li>
+      <li><strong>3.</strong> Keep your <strong>phone or screen 40–50 cm</strong> away from your face to avoid strain and improve focus detection.</li>
     </ul>
   </div>
 
+  <!-- Privacy Policy Section -->
   <div id="privacy" class="info-section">
     <h3>Privacy Policy</h3>
-    <p>This app runs entirely in your browser. Your camera feed is never stored or sent anywhere. All posture detection happens locally, and your daily study time is saved securely in your browser's localStorage.</p>
+    <p>Your camera is used only locally within your browser for posture and face direction detection. No photos, videos, or personal data are saved or shared. Your daily study time is stored only on your device using localStorage.</p>
   </div>
 </body>
 </html>
